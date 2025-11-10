@@ -5,8 +5,11 @@ import { pipeline } from 'stream/promises';
 import { UUID, User } from './types';
 import { getUserIdFromUrl, sendError, sendData, isValidUserData } from './utils';
 import { API_USERS } from './constants';
+import dotenv from 'dotenv';
 
-const PORT = 3000;
+dotenv.config();
+
+const PORT = process.env.PORT || 3000;
 
 const users: Record<UUID, User> = {};
 

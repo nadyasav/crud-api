@@ -6,6 +6,7 @@ import { UUID, User } from './types';
 import { getUserIdFromUrl, sendError, sendData, isValidUserData } from './utils';
 import { API_USERS } from './constants';
 import dotenv from 'dotenv';
+import { validate as isValidUUID } from 'uuid';
 
 dotenv.config();
 
@@ -53,6 +54,11 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (!isValidUUID(userId)) {
+        sendError(res, 'Invalid user id format', 400);
+        return;
+      }
+
       const user = users[userId as UUID];
       if (!user) {
         sendError(res, 'User not found', 404);
@@ -87,6 +93,33 @@ const server = http.createServer(async (req, res) => {
       } catch {
         sendError(res, 'Invalid JSON', 400);
       }
+      return;
+
+    case 'DELETE':
+      if (url === API_USERS || url === API_USERS + '/') {
+        sendError(res, 'Not found', 404);
+        return;
+      }
+
+      const deleteUserId = getUserIdFromUrl(url);
+      if (!deleteUserId) {
+        sendError(res, 'Not found', 404);
+        return;
+      }
+
+      if (!isValidUUID(deleteUserId)) {
+        sendError(res, 'Invalid user id format', 400);
+        return;
+      }
+
+      if (!users[deleteUserId as UUID]) {
+        sendError(res, 'User not found', 404);
+        return;
+      }
+
+      delete users[deleteUserId as UUID];
+      res.writeHead(204);
+      res.end();
       return;
 
     default:
